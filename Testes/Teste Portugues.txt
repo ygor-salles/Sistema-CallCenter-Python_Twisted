@@ -1,0 +1,20 @@
+ligar 1
+resposta A
+desligar 1
+ligar 2
+ligar 3
+resposta A
+resposta B
+ligar 4
+ligar 5
+desligar 3
+desligar 2
+resposta B
+rejeitar A
+ligar 6
+desligar 5
+ligar 7
+desligar 7
+desligar 6
+desligar 4
+

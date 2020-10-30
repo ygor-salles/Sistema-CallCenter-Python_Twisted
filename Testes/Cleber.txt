@@ -1,0 +1,111 @@
+queue = []
+Answered = []
+i=1
+status = ('available','ringing','busy')
+operator = {'A':[status[0],0],'B':[status[0],0]}
+while True:
+    opt = str(input('Type: '))
+    print('\n')
+    call=0
+    if (opt == 'call %d'%i): 
+        if (operator['A'][0]==status[0] and operator['B'][0]==status[0]):
+            print('Call %d received'%i)
+            print('Call %d ringing for operator A'%i)
+            operator['A'][0] = status[1]
+            operator['A'][1] = i
+            Answered.append(i)
+        elif(operator['A'][0]!=status[0] and operator['B'][0]==status[0]):
+            print('Call %d received'%i)
+            print('Call %d ringing for operator B'%i)
+            operator['B'][0] = status[1]
+            operator['B'][1] = i
+            Answered.append(i)
+        elif(operator['A'][0] != status[0] and operator['B'][0] != status[0]):
+            queue.append(i)
+            print('Call %d received'%i)
+            print('Call %d waiting in queue'%i)
+        i += 1  
+    elif (opt =='answer A'):
+        call = operator['A'][1]
+        print('Call %s answered by operator A'%call)
+        operator['A'][0] = status[2]
+    elif (opt =='answer B'):
+        call = operator['B'][1]
+        print('Call %s answered by operator B'%call)
+        operator['B'][0] = status[2]
+    elif (opt == 'reject A' and operator['A'][0] == status[1]):
+        call = operator['A'][1]
+        print('Call %s rejected by operator A'%call)
+        operator['A'][0] = status[0]
+        if (operator['B'][0] == status[0]):
+            print('Call %s ringing for operator B'%call)
+            operator['B'][0] = status[1]
+            operator['B'][1] = operator['A'][1]
+            operator['A'][1] = 0
+        else:
+            print('Call %s ringing for operator A'%call)
+            operator['A'][0] = status[1]
+    elif (opt =='reject B' and operator['B'][0] == status[1]):
+        call = operator['B'][1]
+        print('Call %s rejected by opertor B'%call)
+        operator['B'][0] = status[0]
+        if operator['A'][0]==status[0]:    
+            print('Call %s ringing for operator A'%call)
+            operator['A'][0] = status[1]
+            operator['A'][1] = operator['B'][1]
+            operator['B'][1] = 0
+        else:
+            print('Call %s ringing for operator B'%call)
+            operator['B'] = status[1]
+    elif (opt[:6] == "hangup"):
+        ncall = int(opt[6:])
+        if (ncall == operator['A'][1]): # Call for operator A
+            if (operator['A'][0] == status[1]): # Ringing
+                Answered.remove(operator['A'][1])
+                print('call %s missed'%ncall)
+                operator['A'][0] = status[0]
+                operator['A'][1] = 0
+                if (not len(queue) ==0):
+                    operator['A'][0] = status[1]
+                    operator['A'][1] = queue[0]
+                    print('Call %d ringing for operator A'%queue.pop(0))
+                    Answered.append(operator['A'][1])
+            elif (operator['A'][0] == status[2]): # Busy
+                Answered.remove(operator['A'][1])
+                print('Call %s finished and operator A available'%ncall)
+                operator['A'][0] = status[0]
+                operator['A'][1] = 0
+                if (not len(queue) ==0):
+                    operator['A'][0] = status[1]
+                    operator['A'][1] = queue[0]
+                    print('Call %d ringing for operator A'%queue.pop(0))
+                    Answered.append(operator['A'][1])
+        elif (ncall == operator['B'][1]): # Call for operator B
+            if (operator['B'][0] == status[1]): # Ringing
+                Answered.remove(operator['B'][1])
+                print('call %s missed'%ncall)
+                operator['B'][0] = status[0]
+                operator['B'][1] = 0
+                if (not len(queue) ==0):
+                    operator['B'][0] = status[1]
+                    operator['B'][1] = queue[0]
+                    print('Call %d ringing for operator B'%queue.pop(0))
+                    Answered.append(operator['B'][1])
+            if (operator['B'][0] == status[2]): # Busy
+                Answered.remove(operator['B'][1])
+                print('Call %s finished and operator B available'%ncall)
+                operator['B'][0] = status[0]
+                operator['B'][1] = 0
+                if (not len(queue) ==0):
+                    operator['B'][0] = status[1]
+                    operator['B'][1] = queue[0]
+                    print('Call %d ringing for operator B'%queue.pop(0))
+                    Answered.append(operator['B'][1])
+        else:
+            if (not len(queue) ==0):
+                queue.remove(ncall)
+                print('call %s missed'%ncall)
+    elif (opt == 'end'):
+        break
+    #else:
+    print('\n')

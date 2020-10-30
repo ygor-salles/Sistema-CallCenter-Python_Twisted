@@ -1,0 +1,147 @@
+#import os
+
+fila = [] #para fila de espera de chamadas
+i=1 #contador de ligações
+c=0 #contador para chamadas atendidas
+#para validar a chamada do respectivo operador
+statusA = 'disponivel'
+statusB = 'disponivel'
+#para validar o identificador de chamadas de cada Operador
+identificadorA=0
+identificadorB=0
+#para validar qual chamada foi rejeitada
+rejeicao=0
+
+while True:
+    print('\nFila de espera = '+str(fila))
+    print('Status A: '+str(statusA))
+    print('Status B: '+str(statusB))
+    print('\nMENU DE OPÇÕES - ESCOLHA UMA DAS OPÇÕES:')
+    print('("ligar %d") '%i)
+    print('("resposta A" ou "resposta B")')
+    print('("rejeitar A" ou "rejeitar B")')
+    print('("desligar _")')
+    print('("sair")')
+    opcao = str(input('Opção:..>> '))
+    
+    ##################################  LIGAR   ############################################
+    if (opcao == 'ligar %d'%i):
+        print('Chamada %d recebida'%i)
+        if (statusA=='disponivel' and statusB=='disponivel'):    
+            print('Chamada %d tocando para o operador A'%i)
+            statusA = 'tocando'
+    
+        elif(statusA=='disponivel' and (statusB=='tocando' or statusB=='ocupado')):
+            print('Chamada %d tocando para o operador A'%i)
+            statusA = 'tocando'
+
+        elif(statusB=='disponivel' and (statusA=='tocando' or statusA=='ocupado')):
+            print('Chamada %d tocando para o operador B'%i)
+            statusB = 'tocando'
+    
+        elif(statusA != 'disponivel' and statusB != 'disponivel'):
+            fila.append(i)
+            print('Chamada %d em espera na fila'%i)
+
+        else:
+            print('FAVOR VALIDAR A LIGAÇÃO CORRETA DO MOMENTO')
+        
+        i += 1
+
+    
+    ##################################  RESPOSTA   ############################################
+    elif (opcao=='resposta A' or opcao=='resposta B'):
+        if(statusA=='tocando' and opcao=='resposta A'):
+            c += 1
+            identificadorA = c
+            print('Chamada %d atendida pelo operador A'%c)
+            statusA='ocupado'
+            
+        elif(statusB=='tocando' and opcao=='resposta B'):
+            c += 1
+            identificadorB = c
+            print('Chamada %d atendida pelo operador B'%c)
+            statusB='ocupado'
+            
+        else:
+            print('NÃO POSSUI LIGAÇÃO PARA OU OPERADOR CITADO OU ESTÁ OCUPADO..')
+
+        
+    ##################################  REJEITAR   ############################################
+    elif (opcao=='rejeitar A' or opcao=='rejeitar B'):
+        if(statusA=='tocando' and opcao=='rejeitar A'):
+            print('Chamada %d rejeitada pelo operador A'%(c+1))
+            statusA='disponivel'
+            fila.insert(0, int(c+1))
+            rejeicao=c+1
+            print('Ligue %d tocando para o operador A'%(c+1))
+            statusA='tocando'
+
+        elif(statusB=='tocando' and opcao=='rejeitar B'):
+            print('Chamada %d rejeitada pelo operador B'%(c+1))
+            statusB='disponivel'
+            fila.insert(0, int(c+1))
+            rejeicao=c+1
+            print('Ligue %d tocando para o operador B'%(c+1))
+            statusB='tocando'
+
+        else:
+            print('NÃO POSSUI LIGAÇÃO PARA O OPERADOR CITADO..')
+
+
+    ##################################  DESLIGAR   ############################################
+    elif ('desligar' in opcao):
+        elemento = int(opcao[9:])
+
+        if(identificadorA == elemento and statusA=='ocupado'):
+            print('Chamada %d concluída e operador A disponível'%identificadorA)
+            statusA = 'disponivel'
+            if not len(fila) == 0:
+                print('Chamada %d tocando para o operador A'%fila.pop(0))
+                statusA='tocando'
+
+        elif(identificadorB == elemento and statusB=='ocupado'):
+            print('Chamada %d concluída e operador B disponível'%identificadorB)
+            statusB = 'disponivel'
+            if not len(fila) == 0:
+                print('Chamada %d tocando para o operador B'%fila.pop(0))
+                statusB='tocando'
+
+        elif (elemento==rejeicao and statusA=='tocando'):
+            print('Chamada %d perdida'%fila.pop(0))
+            print('Chamada %d tocando para o operador A'%fila[0])
+            statusA='tocando'
+
+        elif (elemento==rejeicao and statusB=='tocando'):
+            print('Chamada %d perdida'%fila.pop(0))
+            print('Chamada %d tocando para o operador B'%fila[0])
+            statusB='tocando'
+        
+        elif (identificadorA!=elemento and identificadorB!=elemento and not len(fila)==0):
+            print('Chamada %d perdida'%elemento)
+            if (statusA=='disponivel' and (elemento== fila[0])):
+                print('Chamada %d tocando para o operador A'%fila.pop(0))
+                statusA='tocando'
+            elif (statusB=='disponivel' and (elemento== fila[0])):
+                print('Chamada %d tocando para o operador B'%fila.pop(0))
+                statusB='tocando'
+            elif (elemento!=fila[0]):
+                fila.remove(elemento)
+            else:
+                del fila[0]
+        
+        else:
+            print('CHAMADA %d NÃO ENCONTRADA NA FILA'%elemento)
+
+    ##################################  FINALIZAR / SE ERRO   ############################################
+
+    elif (opcao == 'sair'):
+        print('\nFINALIZANDO SESSÃO.. \n')
+        break
+    else:
+        print('\nOPÇÃO INVÁLIDA!')
+    
+    print('\n')
+    #os.system('pause')
+    #os.system('cls') or None
+    #print('Operador A atendendo ligação %d e Operador B atendendo ligação %d'%(identificadorA, identificadorB))

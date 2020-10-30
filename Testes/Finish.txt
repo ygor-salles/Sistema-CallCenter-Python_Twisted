@@ -1,0 +1,147 @@
+#import os
+fila = [] #para fila de espera de chamadas
+i=1 #contador de ligações
+c=0 #contador para chamadas atendidas
+#para validar a chamada do respectivo operador
+statusA = 'available'
+statusB = 'available'
+#para validar o identificador de chamadas de cada Operador
+identificadorA=0
+identificadorB=0
+#para validar qual chamada foi rejeitada
+rejeicao=0
+
+while True:
+    print('\n-------------------------------------------------------------')
+    print('Queue = '+str(fila))
+    print('Status A: '+str(statusA))
+    print('Status B: '+str(statusB)+'\n')
+    """print('OPTIONS MENU - CHOOSE ONE OF THE OPTIONS:')
+    print('("call %d") '%i)
+    print('("answer A" ou "answer B")')
+    print('("reject A" ou "reject B")')
+    print('("hangup _")')
+    print('("exit")')"""
+    opt1 = [v for v in input('Option:..>> ').strip().split(', ')]
+    for x in opt1:
+        opcao = x
+
+        ##################################  LIGAR   ############################################
+        if (opcao == 'call %d'%i):
+            print('Call %d received'%i)
+            if (statusA=='available' and statusB=='available'):    
+                print('Call %d ringing for operator A'%i)
+                statusA = 'ringing'
+        
+            elif(statusA=='available' and (statusB=='ringing' or statusB=='busy')):
+                print('Call %d ringing for operator A'%i)
+                statusA = 'ringing'
+
+            elif(statusB=='available' and (statusA=='ringing' or statusA=='busy')):
+                print('Call %d ringing for operator B'%i)
+                statusB = 'ringing'
+        
+            elif(statusA != 'available' and statusB != 'available'):
+                fila.append(i)
+                print('Call %d waiting in queue'%i)
+
+            else:
+                print('PLEASE VALIDATE THE CORRECT CONNECTION OF THE MOMENT')
+            
+            i += 1
+
+        
+        ##################################  RESPOSTA   ############################################
+        elif (opcao=='answer A' or opcao=='answer B'):
+            if(statusA=='ringing' and opcao=='answer A'):
+                c += 1
+                identificadorA = c
+                print('Call %d answered by operator A'%c)
+                statusA='busy'
+                
+            elif(statusB=='ringing' and opcao=='answer B'):
+                c += 1
+                identificadorB = c
+                print('Call %d answered by operator B'%c)
+                statusB='busy'
+                
+            else:
+                print('HAS NO CONNECTION TO THE QUOTE OPERATOR OR IS OCCUPIED..')
+
+            
+        ##################################  REJEITAR   ############################################
+        elif (opcao=='reject A' or opcao=='reject B'):
+            if(statusA=='ringing' and opcao=='reject A'):
+                print('Call %d rejected by operator A'%(c+1))
+                statusA='available'
+                fila.insert(0, int(c+1))
+                rejeicao=c+1
+                print('Call %d ringing for operator A'%(c+1))
+                statusA='ringing'
+
+            elif(statusB=='ringing' and opcao=='reject B'):
+                print('Call %d rejected by operator B'%(c+1))
+                statusB='available'
+                fila.insert(0, int(c+1))
+                rejeicao=c+1
+                print('Call %d ringing for operator B'%(c+1))
+                statusB='ringing'
+
+            else:
+                print('DOES NOT HAVE A CONNECTION TO THE CITED OPERATOR..')
+
+
+        ##################################  DESLIGAR   ############################################
+        elif ('hangup' in opcao):
+            elemento = int(opcao[7:])
+
+            if(identificadorA == elemento and statusA=='busy'):
+                print('Call %d finished and operator A available'%identificadorA)
+                statusA = 'available'
+                if not len(fila) == 0:
+                    print('Call %d ringing for operator A'%fila.pop(0))
+                    statusA='ringing'
+
+            elif(identificadorB == elemento and statusB=='busy'):
+                print('Call %d finished and operator B available'%identificadorB)
+                statusB = 'available'
+                if not len(fila) == 0:
+                    print('Call %d ringing for operator B'%fila.pop(0))
+                    statusB='ringing'
+
+            elif (elemento==rejeicao and statusA=='ringing'):
+                print('Call %d received'%fila.pop(0))
+                print('Call %d ringing for operator A'%fila[0])
+                statusA='ringing'
+
+            elif (elemento==rejeicao and statusB=='ringing'):
+                print('Call %d received'%fila.pop(0))
+                print('Call %d ringing for operator B'%fila[0])
+                statusB='ringing'
+            
+            elif (identificadorA!=elemento and identificadorB!=elemento and not len(fila)==0):
+                print('Call %d received'%elemento)
+                if (statusA=='available' and (elemento== fila[0])):
+                    print('Call %d ringing for operator A'%fila.pop(0))
+                    statusA='ringing'
+                elif (statusB=='available' and (elemento== fila[0])):
+                    print('Call %d ringing for operator B'%fila.pop(0))
+                    statusB='ringing'
+                elif (elemento!=fila[0]):
+                    fila.remove(elemento)
+                else:
+                    del fila[0]
+            
+            else:
+                print('CALL %d NOT FOUND IN QUEUE'%elemento)
+
+        ##################################  FINALIZAR / SE ERRO   ############################################
+
+        elif (opcao == 'exit'):
+            print('\nENDING SESSION.. \n')
+            exit()
+        else:
+            print('\nINVALID OPTION!')
+        
+        #os.system('pause')
+        #os.system('cls') or None
